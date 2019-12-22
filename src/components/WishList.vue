@@ -1,11 +1,11 @@
 <template>
   <div>
-    <div id="main-content" class="container">
+    <div id="main-content" class="container" style="width:50%;">
       <b-list-group>
-        <b-list-group-item
-          v-for="message in this.received_messages"
-          :key="message.id"
-        >{{message.name}}</b-list-group-item>
+        <b-list-group-item v-for="message in this.received_messages" :key="message.id">
+          <span style="float:left;">{{message.name}}</span>
+          <span style="float:right;">{{message.description}}</span>
+        </b-list-group-item>
       </b-list-group>
       <br>
       <b-button squared variant="info" v-on:click="fetchData">More</b-button>
@@ -37,7 +37,9 @@ export default {
       axios({
         method: "GET",
         url:
-          "http://localhost:8080/fetchAllByPageNumber?pageNumber=" + this.page
+          process.env.VUE_APP_BACKEND_HOST +
+          "fetchAllByPageNumber?pageNumber=" +
+          this.page
       }).then(
         result => {
           this.received_messages.push(...Array.from(new Set(result.data)));
@@ -49,7 +51,9 @@ export default {
       );
     },
     connect() {
-      this.socket = new SockJS("http://localhost:8080/wl-websocket");
+      this.socket = new SockJS(
+        process.env.VUE_APP_BACKEND_HOST + process.env.VUE_APP_SOCKET_ENDPOINT
+      );
       this.stompClient = Stomp.over(this.socket);
       this.stompClient.connect(
         {},
@@ -74,7 +78,6 @@ export default {
                 );
               }
             }
-            //this.received_messages.push(JSON.parse(tick.body).content);
           });
         },
         error => {
